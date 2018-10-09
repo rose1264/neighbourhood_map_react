@@ -30,8 +30,8 @@ class App extends Component {
 
       ],
       prevMarker:'',
-      'map': '',
-      'infowindow': '',
+      map: '',
+      infowindow: '',
     }
   }
 
@@ -234,7 +234,7 @@ class App extends Component {
     this.setState({
       ...this.state,
       map,
-      infowindow: largeInfowindow,
+      // infowindow: largeInfowindow,
     })
 
     const coffeeDefaultIcon = makeCoffeeIcon('5b4922')
@@ -288,6 +288,7 @@ class App extends Component {
       location.marker = marker;
     })
 
+    //callback in marker creator
     function populateInfoWindow(marker, infowindow) {
       if (infowindow.marker !== marker) {
         infowindow.marker = marker;
@@ -299,6 +300,7 @@ class App extends Component {
       }
     }
 
+    //markers setMap
     function showListings() {
       let bounds = new window.google.maps.LatLngBounds();
       markers.forEach(marker => {
@@ -353,6 +355,7 @@ class App extends Component {
             coffeelocations={this.state.locations[0].coffee}
             barlocations={this.state.locations[1].bar}
             openInfoWindow={this.openInfoWindow}
+            map={this.state.map}
           />
         </div>
         <div id="map"></div>

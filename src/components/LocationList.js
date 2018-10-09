@@ -16,10 +16,37 @@ class LocationList extends Component {
   }
 
   handleChange = e => {
+    this.state.locations.forEach(location => {
+      location.marker.setMap(null)
+    })
+    let map = this.props.map
+    let markers=[]
+    let largeInfowindow = new window.google.maps.InfoWindow();
     let searchValue = e.target.value
+
     let searchedLocations = this.state.locations.filter(location => {
       return location.title.toLowerCase().includes(searchValue)
     })
+
+    searchedLocations.forEach((location, idx)=>{
+      const position = location.location
+      const title = location.title
+      const marker = new window.google.maps.Marker({
+        position,
+        title,
+        id: idx,
+      })
+      markers.push(marker)
+
+      marker.addListener('click', function() {
+        this.props.populateInfoWindow(this, largeInfowindow);
+      })
+      location.marker = marker;
+    })
+    markers.forEach(marker=> {
+      marker.setMap(map)
+    })
+
     this.setState({
       ...this.state,
       searchedLocations,
