@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../assets/css/App.css';
 import LocationList from './LocationList'
+import Header from './Header'
 
 class App extends Component {
 
@@ -37,7 +38,6 @@ class App extends Component {
   componentDidMount() {
     window.initMap = this.initMap;
     loadMapJS(`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&callback=initMap`)
-
   }
 
   initMap = () => {
@@ -288,9 +288,6 @@ class App extends Component {
       location.marker = marker;
     })
 
-    document.getElementById('show-listings').addEventListener('click', showListings);
-    document.getElementById('hide-listings').addEventListener('click', hideListings);
-
     function populateInfoWindow(marker, infowindow) {
       if (infowindow.marker !== marker) {
         infowindow.marker = marker;
@@ -311,11 +308,7 @@ class App extends Component {
       map.fitBounds(bounds)
     }
 
-    function hideListings() {
-      markers.forEach(marker => {
-        marker.setMap(null)
-      })
-    }
+    showListings()
 
     function makeCoffeeIcon(color) {
       return  `https://www.google.com/maps/vt/icon/name=assets/icons/poi/tactile/pinlet_shadow-1-small.png,assets/icons/poi/tactile/pinlet_outline_v2-1-small.png,assets/icons/poi/tactile/pinlet-1-small.png,assets/icons/poi/quantum/pinlet/cafe_pinlet-1-small.png&highlight=ff000000,ffffff,${color},ffffff&color=ff000000?scale=2`
@@ -345,15 +338,17 @@ class App extends Component {
     this.state.infowindow.close();
   }
 
+  handleSideBarToggle = e => {
+    e.stopPropagation();
+    let sidebar = document.querySelector(".options-box")
+    sidebar.classList.toggle('open')
+  }
+
   render() {
     return (
       <div className="container">
         <div className="options-box">
-          <h1>NYC Downtown Coffee & Bar</h1>
-          <div>
-            <input id="show-listings" type="button" value="Show Listings" />
-            <input id="hide-listings" type="button" value="Hide Listings" />
-          </div>
+          <Header handleSideBarToggle={this.handleSideBarToggle}/>
           <LocationList
             coffeelocations={this.state.locations[0].coffee}
             barlocations={this.state.locations[1].bar}

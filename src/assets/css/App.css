@@ -38,9 +38,10 @@
 
 h1 {
   color: #525454;
-  font-size: 22px;
+  font-size: 20px;
   margin: 0 0 10px 0;
   text-align: center;
+  width: 90%;
 }
 
 #map {
@@ -53,26 +54,34 @@ h1 {
 .options-box {
   background: #fff;
   border: 1px solid #999;
-  border-radius: 3px;
+  border-radius: 5px;
   height: 100%;
   line-height: 35px;
   padding: 10px 10px 30px 10px;
   text-align: left;
-  width: 340px;
   z-index: 10;
   width: 400px;
-  /*height: 100%;*/
   position: absolute;
-  /* This trasform moves the drawer off canvas. */
-  /* -webkit-transform: translate(-400px, 0);
-  transform: translate(-400px, 0);
-  /* Optionally, we animate the drawer. */
-  /* transition: transform 2s ease; */ 
+  -webkit-transform: translate(-385px, 0);
+  transform: translate(-385px, 0);
 }
 
-.options-box .open {
+.options-box.open {
   -webkit-transform: translate(0, 0);
   transform: translate(0, 0);
+}
+
+.header_menu {
+  display: inline-block;
+  position: fixed;
+  left: 370px;
+  top: 0;
+  padding: 1em;
+  width: 10%;
+}
+a#menu svg {
+  width: 20px;
+  fill: #525454;
 }
 
 #show-listings, #hide-listings {
