@@ -3,7 +3,7 @@ import React from 'react'
 const Header = props => {
   return (
     <div>
-      <h1>Manhattan Downtown Coffee & Bar</h1>
+      <h1>Manhattan Downtown Drinks & around</h1>
       <a
         id="menu"
         role="button"

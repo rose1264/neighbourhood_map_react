@@ -339,7 +339,7 @@ class App extends Component {
     this.state.infowindow.close();
   }
 
-  openInfoWindow(marker,location) {
+  openInfoWindow(marker) {
     this.closeInfoWindow();
     this.state.map.setCenter(marker.getPosition());
     this.state.infowindow.open(this.state.map, marker);
@@ -347,7 +347,6 @@ class App extends Component {
       ...this.state,
       markerOpenedByList: marker
     });
-    // this.state.infowindow.setContent(location.title);
     this.getMarkerInfo(marker)
   }
 
@@ -377,7 +376,7 @@ class App extends Component {
               var checkinsCount = '<b>Number of CheckIn: </b>' + location_data.stats.checkinsCount + '<br>';
               var usersCount = '<b>Number of Users: </b>' + location_data.stats.usersCount + '<br>';
               var tipCount = '<b>Number of Tips: </b>' + location_data.stats.tipCount + '<br>';
-              var readMore = '<a href="https://foursquare.com/v/'+ location_data.id +'" target="_blank">Read More on Foursquare Website</a>'
+              var readMore = '<a href="https://foursquare.com/v/'+ location_data.id +'" target="_blank">Read More on Foursquare Website for a place around</a>'
               self.state.infowindow.setContent(checkinsCount + usersCount + tipCount + verified + readMore);
             });
         }

@@ -5,7 +5,7 @@ class LocationItem extends Component {
     return (
       <li
         role="button"
-        onClick={this.props.openInfoWindow.bind(this, this.props.location.marker, this.props.location)}
+        onClick={this.props.openInfoWindow.bind(this, this.props.location.marker)}
       >
         {this.props.location.title}
       </li>
