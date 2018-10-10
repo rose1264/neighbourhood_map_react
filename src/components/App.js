@@ -27,12 +27,15 @@ class App extends Component {
             {title: 'Pier A Harbor House', location: {lat: 40.7044181, lng: -74.017902}},
           ]
         }
-
       ],
-      prevMarker:'',
+      markerOpenedByList:'',
       map: '',
       infowindow: '',
     }
+
+    this.initMap = this.initMap.bind(this);
+    this.openInfoWindow = this.openInfoWindow.bind(this);
+    this.closeInfoWindow = this.closeInfoWindow.bind(this);
   }
 
   componentDidMount() {
@@ -42,11 +45,11 @@ class App extends Component {
 
   // **************  start of initMap function  **********************//
 
-  initMap = () => {
+  initMap() {
     //variables
+    let self = this
     let map
     let markers = []
-    let largeInfowindow = new window.google.maps.InfoWindow();
     let styles = [
     {
         "featureType": "water",
@@ -226,6 +229,7 @@ class App extends Component {
     //new google map
     const mapview = document.getElementById('map');
     mapview.style.height = window.innerHeight + "px";
+    const largeInfowindow = new window.google.maps.InfoWindow();
     map = new window.google.maps.Map(mapview, {
         center: {lat: 40.7118, lng: -74.0131},
         zoom: 16,
@@ -238,6 +242,14 @@ class App extends Component {
       map,
       infowindow: largeInfowindow,
     })
+
+    window.google.maps.event.addListener(largeInfowindow, 'closeclick', function () {
+      self.closeInfoWindow();
+    });
+
+    window.google.maps.event.addListener(map, 'click', function () {
+      self.closeInfoWindow();
+    });
 
     //create customized markers, push to the markers array
 
@@ -265,9 +277,9 @@ class App extends Component {
         icon: coffeeDefaultIcon,
       })
       markers.push(marker)
-      marker.addListener('click', function() {
-        populateInfoWindow(this, largeInfowindow);
-      })
+      marker.addListener('click', function () {
+        self.openInfoWindow(marker);
+      });
       marker.addListener('mouseover', function(){
         this.setIcon(coffeeHighlightIcon)
       })
@@ -288,9 +300,9 @@ class App extends Component {
         icon: barDefaultIcon,
       })
       markers.push(marker)
-      marker.addListener('click', function() {
-        populateInfoWindow(this, largeInfowindow);
-      })
+      marker.addListener('click', function () {
+        self.openInfoWindow(marker);
+      });
       marker.addListener('mouseover', function(){
         this.setIcon(barHighlightIcon)
       })
@@ -299,46 +311,6 @@ class App extends Component {
       })
       location.marker = marker;
     })
-
-    //callback in marker
-    function populateInfoWindow(marker, infowindow) {
-      if (infowindow.marker !== marker) {
-        infowindow.marker = marker;
-        infowindow.setContent('<div>' + marker.title + '</div>');
-        infowindow.open(map, marker);
-        infowindow.addListener('closeclick',function(){
-          infowindow.setMarker = null;
-        });
-        getMarkerInfo(marker)
-      }
-    }
-
-    const getMarkerInfo = marker => {
-      let self = this;
-      const url = `https://api.foursquare.com/v2/venues/search?client_id=${process.env.REACT_APP_FOURSQUARE_CLIENT_ID}&client_secret=${process.env.REACT_APP_FOURSQUARE_CLIENT_SECRET}&v=20180323&ll=${marker.getPosition().lat()},${marker.getPosition().lng()}&limit=1`;
-      fetch(url)
-        .then(
-          function (response) {
-            if (response.status !== 200) {
-              self.state.infowindow.setContent("Sorry data can't be loaded");
-              return;
-            }
-            response.json()
-              .then(function (data) {
-                var location_data = data.response.venues[0];
-                var verified = '<b>Verified Location: </b>' + (location_data.verified ? 'Yes' : 'No') + '<br>';
-                var checkinsCount = '<b>Number of CheckIn: </b>' + location_data.stats.checkinsCount + '<br>';
-                var usersCount = '<b>Number of Users: </b>' + location_data.stats.usersCount + '<br>';
-                var tipCount = '<b>Number of Tips: </b>' + location_data.stats.tipCount + '<br>';
-                var readMore = '<a href="https://foursquare.com/v/'+ location_data.id +'" target="_blank">Read More on Foursquare Website</a>'
-                self.state.infowindow.setContent(checkinsCount + usersCount + tipCount + verified + readMore);
-              });
-          }
-        )
-        .catch(function (err) {
-            self.state.infowindow.setContent("Sorry data can't be loaded");
-        });
-    }
 
     //combine markers with the map, show on the screen
     function showMarkers() {
@@ -356,25 +328,29 @@ class App extends Component {
 
   // **************  start of callback functions to pass down as props  **********************//
 
-  openInfoWindow = (marker,list) => {
-    this.closeInfoWindow();
-    this.state.infowindow.open(this.state.map, marker);
-    this.setState({
-        'prevmarker': marker
-    });
-    this.state.infowindow.setContent(list.title);
-    this.getMarkerInfo(marker)
-  }
-
-  closeInfoWindow = () => {
-    if (this.state.prevmarker) {
-        this.state.prevmarker.setAnimation(null);
+  closeInfoWindow() {
+    if (this.state.markerOpenedByList) {
+        this.state.markerOpenedByList.setAnimation(null);
     }
     this.setState({
-        'prevmarker': ''
+      ...this.state,
+      markerOpenedByList: ''
     });
     this.state.infowindow.close();
   }
+
+  openInfoWindow(marker,location) {
+    this.closeInfoWindow();
+    this.state.map.setCenter(marker.getPosition());
+    this.state.infowindow.open(this.state.map, marker);
+    this.setState({
+      ...this.state,
+      markerOpenedByList: marker
+    });
+    // this.state.infowindow.setContent(location.title);
+    this.getMarkerInfo(marker)
+  }
+
 
   handleSideBarToggle = e => {
     e.stopPropagation();
@@ -382,6 +358,7 @@ class App extends Component {
     sidebar.classList.toggle('open')
   }
   // **************  end of callback functions to pass down as props  **********************//
+
   // API call to FOURSQUARE
   getMarkerInfo = marker => {
     let self = this;
@@ -412,6 +389,7 @@ class App extends Component {
 
 
   render() {
+
     return (
       <div className="container">
         <div className="options-box">
