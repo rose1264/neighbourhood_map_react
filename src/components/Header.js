@@ -7,7 +7,7 @@ const Header = props => {
       <a
         id="menu"
         role="button"
-        aria-label="Hamburger Menu Icon on clicked it shows list of neighbourhood places to search for"
+        aria-label="Hamburger Menu Icon"
         className="header_menu"
         onClick ={e => {props.handleSideBarToggle(e)}}
         >

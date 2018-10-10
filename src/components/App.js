@@ -40,6 +40,8 @@ class App extends Component {
     loadMapJS(`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&callback=initMap`)
   }
 
+  // **************  start of initMap function  **********************//
+
   initMap = () => {
     //variables
     let map
@@ -221,7 +223,7 @@ class App extends Component {
         ]
     }
 ]
-    //render google map
+    //new google map
     const mapview = document.getElementById('map');
     mapview.style.height = window.innerHeight + "px";
     map = new window.google.maps.Map(mapview, {
@@ -234,8 +236,18 @@ class App extends Component {
     this.setState({
       ...this.state,
       map,
-      // infowindow: largeInfowindow,
+      infowindow: largeInfowindow,
     })
+
+    //create customized markers, push to the markers array
+
+    function makeCoffeeIcon(color) {
+      return  `https://www.google.com/maps/vt/icon/name=assets/icons/poi/tactile/pinlet_shadow-1-small.png,assets/icons/poi/tactile/pinlet_outline_v2-1-small.png,assets/icons/poi/tactile/pinlet-1-small.png,assets/icons/poi/quantum/pinlet/cafe_pinlet-1-small.png&highlight=ff000000,ffffff,${color},ffffff&color=ff000000?scale=2`
+    }
+
+    function makeBarIcon(color) {
+      return  `https://www.google.com/maps/vt/icon/name=assets/icons/poi/tactile/pinlet_shadow-1-small.png,assets/icons/poi/tactile/pinlet_outline_v2-1-small.png,assets/icons/poi/tactile/pinlet-1-small.png,assets/icons/poi/quantum/pinlet/bar_pinlet-1-small.png&highlight=ff000000,ffffff,${color},ffffff&color=ff000000?scale=2`
+    }
 
     const coffeeDefaultIcon = makeCoffeeIcon('5b4922')
     const coffeeHighlightIcon = makeCoffeeIcon('ff9e67')
@@ -288,7 +300,7 @@ class App extends Component {
       location.marker = marker;
     })
 
-    //callback in marker creator
+    //callback in marker
     function populateInfoWindow(marker, infowindow) {
       if (infowindow.marker !== marker) {
         infowindow.marker = marker;
@@ -297,11 +309,39 @@ class App extends Component {
         infowindow.addListener('closeclick',function(){
           infowindow.setMarker = null;
         });
+        getMarkerInfo(marker)
       }
     }
 
-    //markers setMap
-    function showListings() {
+    const getMarkerInfo = marker => {
+      let self = this;
+      const url = `https://api.foursquare.com/v2/venues/search?client_id=${process.env.REACT_APP_FOURSQUARE_CLIENT_ID}&client_secret=${process.env.REACT_APP_FOURSQUARE_CLIENT_SECRET}&v=20180323&ll=${marker.getPosition().lat()},${marker.getPosition().lng()}&limit=1`;
+      fetch(url)
+        .then(
+          function (response) {
+            if (response.status !== 200) {
+              self.state.infowindow.setContent("Sorry data can't be loaded");
+              return;
+            }
+            response.json()
+              .then(function (data) {
+                var location_data = data.response.venues[0];
+                var verified = '<b>Verified Location: </b>' + (location_data.verified ? 'Yes' : 'No') + '<br>';
+                var checkinsCount = '<b>Number of CheckIn: </b>' + location_data.stats.checkinsCount + '<br>';
+                var usersCount = '<b>Number of Users: </b>' + location_data.stats.usersCount + '<br>';
+                var tipCount = '<b>Number of Tips: </b>' + location_data.stats.tipCount + '<br>';
+                var readMore = '<a href="https://foursquare.com/v/'+ location_data.id +'" target="_blank">Read More on Foursquare Website</a>'
+                self.state.infowindow.setContent(checkinsCount + usersCount + tipCount + verified + readMore);
+              });
+          }
+        )
+        .catch(function (err) {
+            self.state.infowindow.setContent("Sorry data can't be loaded");
+        });
+    }
+
+    //combine markers with the map, show on the screen
+    function showMarkers() {
       let bounds = new window.google.maps.LatLngBounds();
       markers.forEach(marker => {
         marker.setMap(map)
@@ -310,16 +350,11 @@ class App extends Component {
       map.fitBounds(bounds)
     }
 
-    showListings()
-
-    function makeCoffeeIcon(color) {
-      return  `https://www.google.com/maps/vt/icon/name=assets/icons/poi/tactile/pinlet_shadow-1-small.png,assets/icons/poi/tactile/pinlet_outline_v2-1-small.png,assets/icons/poi/tactile/pinlet-1-small.png,assets/icons/poi/quantum/pinlet/cafe_pinlet-1-small.png&highlight=ff000000,ffffff,${color},ffffff&color=ff000000?scale=2`
-    }
-
-    function makeBarIcon(color) {
-      return  `https://www.google.com/maps/vt/icon/name=assets/icons/poi/tactile/pinlet_shadow-1-small.png,assets/icons/poi/tactile/pinlet_outline_v2-1-small.png,assets/icons/poi/tactile/pinlet-1-small.png,assets/icons/poi/quantum/pinlet/bar_pinlet-1-small.png&highlight=ff000000,ffffff,${color},ffffff&color=ff000000?scale=2`
-    }
+    showMarkers()
   }
+  // **************  end of initMap function  **********************//
+
+  // **************  start of callback functions to pass down as props  **********************//
 
   openInfoWindow = (marker,list) => {
     this.closeInfoWindow();
@@ -328,6 +363,7 @@ class App extends Component {
         'prevmarker': marker
     });
     this.state.infowindow.setContent(list.title);
+    this.getMarkerInfo(marker)
   }
 
   closeInfoWindow = () => {
@@ -345,6 +381,35 @@ class App extends Component {
     let sidebar = document.querySelector(".options-box")
     sidebar.classList.toggle('open')
   }
+  // **************  end of callback functions to pass down as props  **********************//
+  // API call to FOURSQUARE
+  getMarkerInfo = marker => {
+    let self = this;
+    const url = `https://api.foursquare.com/v2/venues/search?client_id=${process.env.REACT_APP_FOURSQUARE_CLIENT_ID}&client_secret=${process.env.REACT_APP_FOURSQUARE_CLIENT_SECRET}&v=20180323&ll=${marker.getPosition().lat()},${marker.getPosition().lng()}&limit=1`;
+    fetch(url)
+      .then(
+        function (response) {
+          if (response.status !== 200) {
+            self.state.infowindow.setContent("Sorry data can't be loaded");
+            return;
+          }
+          response.json()
+            .then(function (data) {
+              var location_data = data.response.venues[0];
+              var verified = '<b>Verified Location: </b>' + (location_data.verified ? 'Yes' : 'No') + '<br>';
+              var checkinsCount = '<b>Number of CheckIn: </b>' + location_data.stats.checkinsCount + '<br>';
+              var usersCount = '<b>Number of Users: </b>' + location_data.stats.usersCount + '<br>';
+              var tipCount = '<b>Number of Tips: </b>' + location_data.stats.tipCount + '<br>';
+              var readMore = '<a href="https://foursquare.com/v/'+ location_data.id +'" target="_blank">Read More on Foursquare Website</a>'
+              self.state.infowindow.setContent(checkinsCount + usersCount + tipCount + verified + readMore);
+            });
+        }
+      )
+      .catch(function (err) {
+          self.state.infowindow.setContent("Sorry data can't be loaded");
+      });
+  }
+
 
   render() {
     return (
@@ -355,6 +420,8 @@ class App extends Component {
             coffeelocations={this.state.locations[0].coffee}
             barlocations={this.state.locations[1].bar}
             openInfoWindow={this.openInfoWindow}
+            closeInfoWindow={this.closeInfoWindow}
+            getMarkerInfo={this.getMarkerInfo}
             map={this.state.map}
           />
         </div>
@@ -366,6 +433,7 @@ class App extends Component {
 
 export default App;
 
+  // add script onto the html
 function loadMapJS(src){
     let ref = document.getElementsByTagName("script")[0];
     let script = document.createElement("script");
