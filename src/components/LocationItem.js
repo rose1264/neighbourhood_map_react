@@ -5,6 +5,8 @@ class LocationItem extends Component {
     return (
       <li
         role="button"
+        aria-hidden = {this.props.menuHidden}
+        tabIndex={this.props.viewIndex}
         onClick={this.props.openInfoWindow.bind(this, this.props.location.marker)}
       >
         {this.props.location.title}

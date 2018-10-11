@@ -37,9 +37,15 @@ class LocationList extends Component {
   }
 //*************************end of callback *****************//
   render() {
+    let viewIndex =0
+    if(this.props.menuHidden) {
+      viewIndex = -1
+    }
     let locationlist = this.state.locations.map((location, idx) => {
       return (
         <LocationItem
+          menuHidden = {this.state.menuHidden}
+					viewIndex={viewIndex}
           key={idx}
           location={location}
           openInfoWindow={this.props.openInfoWindow}
@@ -53,6 +59,8 @@ class LocationList extends Component {
           aria-labelledby="filter"
           placeholder="Filter"
           value={this.state.query}
+          aria-hidden = {this.props.menuHidden}
+          tabIndex={viewIndex}
           onChange={this.handleChange}
           style={{width: '90%'}}
         />

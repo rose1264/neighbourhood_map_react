@@ -31,6 +31,7 @@ class App extends Component {
       markerOpenedByList:'',
       map: '',
       infowindow: '',
+      menuHidden: true,
     }
 
     this.initMap = this.initMap.bind(this);
@@ -38,12 +39,20 @@ class App extends Component {
     this.closeInfoWindow = this.closeInfoWindow.bind(this);
   }
 
+
+
   componentDidMount() {
     window.initMap = this.initMap;
+    window.gm_authFailure = this.gm_authFailure;
+
     loadMapJS(`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&callback=initMap`)
   }
 
   // **************  start of initMap function  **********************//
+
+  gm_authFailure(){
+    window.alert("Google Maps error!")
+  }
 
   initMap() {
     //variables
@@ -343,6 +352,7 @@ class App extends Component {
     this.closeInfoWindow();
     this.state.map.setCenter(marker.getPosition());
     this.state.infowindow.open(this.state.map, marker);
+    marker.setAnimation(window.google.maps.Animation.BOUNCE);
     this.setState({
       ...this.state,
       markerOpenedByList: marker
@@ -355,6 +365,9 @@ class App extends Component {
     e.stopPropagation();
     let sidebar = document.querySelector(".options-box")
     sidebar.classList.toggle('open')
+    this.setState({
+      menuHidden: !this.state.menuHidden
+    })
   }
   // **************  end of callback functions to pass down as props  **********************//
 
@@ -394,6 +407,7 @@ class App extends Component {
         <div className="options-box">
           <Header handleSideBarToggle={this.handleSideBarToggle}/>
           <LocationList
+            menuHidden = {this.state.menuHidden}
             coffeelocations={this.state.locations[0].coffee}
             barlocations={this.state.locations[1].bar}
             openInfoWindow={this.openInfoWindow}
@@ -417,5 +431,6 @@ function loadMapJS(src){
     script.src = src;
     script.async = true;
     script.defer = true;
+    script.onerror = function(){window.alert("Google Maps API failed to load data!")}
     ref.parentNode.insertBefore(script, ref);
 }

@@ -17,5 +17,11 @@ My Map is about Manhattan Downtown Coffee & Bar locations, using Google Map Api 
 ```
  - run 'npm start' (the app will run locally on port 3000 by default)
 
+## Service Worker
+### The service worker is implemented only in the production build
+ - npm run build
+ - serve -s build
+ - navigate to http://localhost:5000
+
 ## Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.

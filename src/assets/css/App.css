@@ -64,6 +64,7 @@ h1 {
   position: absolute;
   -webkit-transform: translate(-385px, 0);
   transform: translate(-385px, 0);
+  overflow: scroll;
 }
 
 .options-box.open {

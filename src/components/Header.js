@@ -6,6 +6,7 @@ const Header = props => {
       <h1>Manhattan Downtown Drinks & around</h1>
       <a
         id="menu"
+        tabIndex = {0}
         role="button"
         aria-label="Hamburger Menu Icon"
         className="header_menu"
